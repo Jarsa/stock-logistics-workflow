@@ -20,6 +20,7 @@
     'data': [
         'views/stock.xml',
         'data/product_removal.xml',
-        ],
+        'views/stock_picking.xml',
+    ],
     'installable': True,
 }
