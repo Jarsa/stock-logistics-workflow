@@ -1,0 +1,124 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* stock_picking_mass_assign
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 11.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-01-12 03:24+0000\n"
+"PO-Revision-Date: 2018-01-12 03:24+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: stock_picking_mass_assign
+#: model:ir.ui.view,arch_db:stock_picking_mass_assign.view_check_assign_all
+msgid "Apply"
+msgstr "Aplicar"
+
+#. module: stock_picking_mass_assign
+#: model:ir.ui.view,arch_db:stock_picking_mass_assign.view_check_assign_all
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. module: stock_picking_mass_assign
+#: model:ir.actions.act_window,name:stock_picking_mass_assign.action_check_assign_all
+#: model:ir.model.fields,field_description:stock_picking_mass_assign.field_stock_picking_check_assign_all_check_availability
+msgid "Check Availability"
+msgstr "Reivsar Disponibilidad"
+
+#. module: stock_picking_mass_assign
+#: model:ir.actions.server,name:stock_picking_mass_assign.ir_cron_check_assign_all_ir_actions_server
+#: model:ir.cron,cron_name:stock_picking_mass_assign.ir_cron_check_assign_all
+#: model:ir.cron,name:stock_picking_mass_assign.ir_cron_check_assign_all
+msgid "Check Availability of Delivery Orders"
+msgstr "Revisar Disponibilidad de Órdenes de Entrega"
+
+#. module: stock_picking_mass_assign
+#: model:ir.ui.view,arch_db:stock_picking_mass_assign.view_check_assign_all
+msgid "Check the availability of the selected delivery orders"
+msgstr "Revisar disponivilidad de las órdenes de entrega seleccionadas"
+
+#. module: stock_picking_mass_assign
+#: model:ir.model.fields,field_description:stock_picking_mass_assign.field_stock_picking_check_assign_all_create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: stock_picking_mass_assign
+#: model:ir.model.fields,field_description:stock_picking_mass_assign.field_stock_picking_check_assign_all_create_date
+msgid "Created on"
+msgstr "Creado en"
+
+#. module: stock_picking_mass_assign
+#: model:ir.model,name:stock_picking_mass_assign.model_stock_picking_check_assign_all
+msgid "Delivery Orders Check Availability"
+msgstr "Revisar Disponibilidad de Órdenes de Entrega"
+
+#. module: stock_picking_mass_assign
+#: model:ir.model.fields,field_description:stock_picking_mass_assign.field_stock_picking_check_assign_all_display_name
+msgid "Display Name"
+msgstr "Nombre mostrado"
+
+#. module: stock_picking_mass_assign
+#: model:ir.model.fields,field_description:stock_picking_mass_assign.field_stock_picking_check_assign_all_id
+msgid "ID"
+msgstr "ID (identificación)"
+
+#. module: stock_picking_mass_assign
+#: model:ir.model.fields,field_description:stock_picking_mass_assign.field_stock_picking_check_assign_all___last_update
+msgid "Last Modified on"
+msgstr "Última modificación en"
+
+#. module: stock_picking_mass_assign
+#: model:ir.model.fields,field_description:stock_picking_mass_assign.field_stock_picking_check_assign_all_write_uid
+msgid "Last Updated by"
+msgstr "Última actualización de"
+
+#. module: stock_picking_mass_assign
+#: model:ir.model.fields,field_description:stock_picking_mass_assign.field_stock_picking_check_assign_all_write_date
+msgid "Last Updated on"
+msgstr "Última actualización en"
+
+#. module: stock_picking_mass_assign
+#: code:addons/stock_picking_mass_assign/tests/test_check_assign_all.py:60
+#: code:addons/stock_picking_mass_assign/wizard/check_assign_all.py:41
+#, python-format
+msgid "No selected delivery orders"
+msgstr "No hay órdenes de entrega seleccionadas"
+
+#. module: stock_picking_mass_assign
+#: model:ir.actions.act_window,name:stock_picking_mass_assign.action_deliver_all
+#: model:ir.model,name:stock_picking_mass_assign.model_stock_picking
+#: model:ir.model.fields,field_description:stock_picking_mass_assign.field_stock_picking_check_assign_all_process_picking
+msgid "Transfer"
+msgstr "Transferir"
+
+#. module: stock_picking_mass_assign
+#: model:ir.model.fields,help:stock_picking_mass_assign.field_stock_picking_check_assign_all_check_availability
+msgid "check this box if you want to check the availability of the selected Delivery Orders."
+msgstr "marque esta casilla si desea verificar la disponibilidad de las Órdenes de Entrega seleccionadas."
+
+#. module: stock_picking_mass_assign
+#: model:ir.model.fields,help:stock_picking_mass_assign.field_stock_picking_check_assign_all_process_picking
+msgid "check this box if you want to deliver all the selected Delivery Orders.\n"
+" You'll not have the possibility to realize a partial delivery.\n"
+" If you want to do that, please do it manually on the Delivery Order form."
+msgstr "check this box if you want to deliver all the selected Delivery Orders.\n"
+" No tendrás la posibilidad de realizar una entrega parcial.\n"
+" Si desea hacerlo, hágalo manualmente en el formulario de Pedido de entrega."
+
+#. module: stock_picking_mass_assign
+#: code:addons/stock_picking_mass_assign/models/stock.py:28
+#, python-format
+msgid "error in action_assign for picking %s"
+msgstr "error en action_assign para el picking %s"
+
+#. module: stock_picking_mass_assign
+#: model:ir.ui.view,arch_db:stock_picking_mass_assign.view_check_assign_all
+msgid "or"
+msgstr "o"
+
