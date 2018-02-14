@@ -49,4 +49,4 @@ class StockPicking(models.Model):
             lambda op: not op.lots_visible and op.product_id and
             not op.qty_done)
         for op in operations_to_auto_fill:
-            op.qty_done = op.product_qty
+            op.qty_done = op.product_uom_qty
