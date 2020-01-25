@@ -73,18 +73,14 @@ class StockBatchPicking(models.Model):
     notes = fields.Text("Notes", help="free form remarks")
 
     move_lines = fields.Many2many(
-        comodel_name="stock.move",
-        readonly=True,
-        string="Operations",
-        compute="_compute_move_lines",
+        comodel_name="stock.move", string="Operations", compute="_compute_move_lines"
     )
 
     move_line_ids = fields.Many2many(
         comodel_name="stock.move.line",
         string="Detailed operations",
         compute="_compute_move_line_ids",
-        # HACK: Allow to write sml fields from this model
-        inverse=lambda self: self,
+        readonly=False,
     )
 
     entire_package_ids = fields.Many2many(
@@ -108,29 +104,32 @@ class StockBatchPicking(models.Model):
     @api.depends("picking_ids")
     def _compute_move_lines(self):
         for batch in self:
-            if batch.use_oca_batch_validation:
-                batch.move_lines = batch.picking_ids.mapped("move_lines")
+            batch.move_lines = (
+                batch.use_oca_batch_validation
+                and batch.picking_ids.mapped("move_lines")
+                or False
+            )
 
     @api.depends("picking_ids")
     def _compute_move_line_ids(self):
         for batch in self:
-            if batch.use_oca_batch_validation:
-                batch.move_line_ids = batch.picking_ids.mapped("move_line_ids")
+            batch.move_line_ids = (
+                batch.use_oca_batch_validation
+                and batch.picking_ids.mapped("move_line_ids")
+                or False
+            )
 
     @api.depends("picking_ids")
     def _compute_entire_package_ids(self):
         for batch in self:
-            if batch.use_oca_batch_validation:
-                batch.update(
-                    {
-                        "entire_package_ids": batch.picking_ids.mapped(
-                            "entire_package_ids"
-                        ),
-                        "entire_package_detail_ids": batch.picking_ids.mapped(
-                            "entire_package_detail_ids"
-                        ),
-                    }
-                )
+            batch.update(
+                {
+                    "entire_package_ids": batch.use_oca_batch_validation
+                    and batch.picking_ids.mapped("entire_package_ids" or False),
+                    "entire_package_detail_ids": batch.use_oca_batch_validation
+                    and batch.picking_ids.mapped("entire_package_detail_ids" or False),
+                }
+            )
 
     def _compute_picking_count(self):
         """Calculate number of pickings."""
@@ -189,7 +188,6 @@ class StockBatchPicking(models.Model):
 
         return all_good
 
-    @api.multi
     def action_cancel(self):
         """ Call action_cancel for all batches pickings
         and set batches states to cancel too.
@@ -201,7 +199,6 @@ class StockBatchPicking(models.Model):
                 if not batch.verify_state():
                     batch.picking_ids.action_cancel()
 
-    @api.multi
     def action_assign(self):
         """ Check if batches pickings are available.
         """
@@ -215,7 +212,6 @@ class StockBatchPicking(models.Model):
             )
             return mass_wiz.mass_action()
 
-    @api.multi
     def action_transfer(self):
         """ Create wizard to process all active pickings in these batches
         """
@@ -229,7 +225,6 @@ class StockBatchPicking(models.Model):
             )
             return mass_wiz.mass_action()
 
-    @api.multi
     def action_print_picking(self):
         pickings = self.mapped("picking_ids")
         if not pickings:
@@ -238,14 +233,12 @@ class StockBatchPicking(models.Model):
             "stock_picking_batch_extended.action_report_batch_picking"
         ).report_action(self)
 
-    @api.multi
     def remove_undone_pickings(self):
         """ Remove of this batch all pickings which state is not done / cancel.
         """
         self.mapped("active_picking_ids").write({"batch_id": False})
         self.verify_state()
 
-    @api.multi
     def action_view_stock_picking(self):
         """This function returns an action that display existing pickings of
         given batch picking.
