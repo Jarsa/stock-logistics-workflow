@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record model="ir.ui.view" id="stock_picking_change_date_wizard_form">
+        <field name="name">stock_picking_change_date_wizard.form</field>
+        <field name="model">stock.picking.change.date.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Change Date of Stock Moves">
+                <group>
+                    <field name="date"/>
+                </group>
+                <footer>
+                    <button string='Change Date' name="change_date" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+           </form>
+        </field>
+    </record>
+    <record id="action_view_stock_picking_change_date_wizard" model="ir.actions.act_window">
+        <field name="name">Change Date</field>
+        <field name="res_model">stock.picking.change.date.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="stock_picking_change_date_wizard_form"/>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="stock.model_stock_picking" />
+        <field name="groups_id" eval="[
+            (4, ref('stock_picking_change_date.allow_change_date_picking')),
+        ]"/>
+    </record>
+</odoo>
