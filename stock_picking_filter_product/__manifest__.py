@@ -3,7 +3,7 @@
 {
     "name": "Stock picking filter proucts",
     "summary": "Show only available products based on their location",
-    "version": "13.0.1.0.0",
+    "version": "15.0.1.0.0",
     "category": "Warehouse",
     "website": "https://github.com/OCA/stock-logistics-workflow"
     "13.0/stock_filter_product",
