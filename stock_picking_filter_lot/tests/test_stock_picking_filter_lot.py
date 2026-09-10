@@ -66,3 +66,42 @@ class TestStockLotLocation(BaseCommon):
             self.lot.location_ids,
             "Location 2 should still be in lot.location_ids",
         )
+
+    def test_location_ids_recomputed_on_quantity_change(self):
+        """The stored field must follow the quant quantity on its own."""
+        quant = self.env["stock.quant"].create(
+            {
+                "product_id": self.product.id,
+                "lot_id": self.lot.id,
+                "location_id": self.location_1.id,
+                "quantity": 10,
+            }
+        )
+
+        self.assertIn(
+            self.location_1,
+            self.lot.location_ids,
+            "Location 1 should be in lot.location_ids without a recompute",
+        )
+
+        quant.quantity = 0
+
+        self.assertNotIn(
+            self.location_1,
+            self.lot.location_ids,
+            "Location 1 should be dropped when the quant is emptied, without "
+            "an explicit recompute",
+        )
+
+    def test_scrap_view_location_encoded_before_lot(self):
+        """The lot domain needs the location, so it must come first."""
+        self.env.user.groups_id |= self.env.ref("stock.group_production_lot")
+        arch = self.env["stock.scrap"].get_view(
+            self.env.ref("stock.stock_scrap_form_view").id, "form"
+        )["arch"]
+
+        self.assertLess(
+            arch.index('name="location_id"'),
+            arch.index('name="lot_id"'),
+            "The source location must be encoded before the lot",
+        )
