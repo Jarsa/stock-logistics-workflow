@@ -1,6 +1,7 @@
 # Copyright 2026 Jarsa
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 from odoo import api, fields, models
+from odoo.exceptions import UserError
 
 
 class StockPicking(models.Model):
@@ -25,6 +26,33 @@ class StockPicking(models.Model):
         "transfer picks. Changing it changes the responsible of that "
         "transfer.",
     )
+
+    picking_progress = fields.Char(
+        string="Progress",
+        compute="_compute_picking_progress",
+        help="Picked lines over the lines of the transfer.",
+    )
+    is_in_progress = fields.Boolean(
+        string="In Progress",
+        compute="_compute_picking_progress",
+        search="_search_is_in_progress",
+        help="Ready transfer where the operator already picked some lines "
+        "(e.g. scanned them in the barcode app) but did not validate yet.",
+    )
+
+    @api.depends("state", "move_ids.picked")
+    def _compute_picking_progress(self):
+        for picking in self:
+            moves = picking.move_ids.filtered(lambda m: m.state not in ("cancel",))
+            picked = len(moves.filtered("picked"))
+            picking.picking_progress = f"{picked}/{len(moves)}" if moves else ""
+            picking.is_in_progress = picking.state == "assigned" and bool(picked)
+
+    def _search_is_in_progress(self, operator, value):
+        if operator not in ("=", "!="):
+            raise NotImplementedError
+        domain = [("state", "=", "assigned"), ("move_ids.picked", "=", True)]
+        return domain if (operator == "=") == bool(value) else ["!", *domain]
 
     @api.depends("move_ids.move_dest_ids.picking_id.state")
     def _compute_next_picking_id(self):
@@ -60,7 +88,18 @@ class StockPicking(models.Model):
         return res
 
     def action_auto_assign_responsible(self):
-        self._auto_assign_responsible(force=True)
+        """Reassign, skipping the transfers somebody already started."""
+        in_progress = self.filtered("is_in_progress")
+        if in_progress and in_progress == self:
+            raise UserError(
+                self.env._(
+                    "%(pickings)s: already in progress, change the responsible by "
+                    "hand if you really want to take it away from %(users)s.",
+                    pickings=", ".join(in_progress.mapped("name")),
+                    users=", ".join(in_progress.user_id.mapped("name")),
+                )
+            )
+        (self - in_progress)._auto_assign_responsible(force=True)
 
     def _auto_assign_responsible(self, force=False):
         """Assign the least loaded user of the operation type pool. Returns

@@ -1,6 +1,7 @@
 # Copyright 2026 Jarsa
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 from odoo import Command
+from odoo.exceptions import UserError
 from odoo.tests.common import TransactionCase
 
 
@@ -290,3 +291,33 @@ class TestStockPickingResponsibleAutoAssign(TransactionCase):
         self._validate(pick)
         self._validate(pack)
         self.assertFalse(pick.next_picking_id)
+
+    def test_17_progress_and_in_progress(self):
+        pick, _ = self._create_chain(3)
+        self.assertEqual(pick.picking_progress, "0/3")
+        self.assertFalse(pick.is_in_progress)
+        pick.action_assign()
+        self.assertEqual(pick.user_id, self.picker_a)
+        line = pick.move_line_ids[0]
+        line.quantity = line.quantity
+        line.picked = True
+        self.assertEqual(pick.picking_progress, "1/3")
+        self.assertTrue(pick.is_in_progress)
+        self.assertIn(
+            pick, self.env["stock.picking"].search([("is_in_progress", "=", True)])
+        )
+        self.assertNotIn(
+            pick, self.env["stock.picking"].search([("is_in_progress", "=", False)])
+        )
+        # reassign skips it, and complains when there is nothing else to do
+        other, _ = self._create_chain(1)
+        other.action_assign()
+        self.assertEqual(other.user_id, self.picker_b)
+        self.picker_b.picking_assign_available = False
+        (pick | other).action_auto_assign_responsible()
+        self.assertEqual(pick.user_id, self.picker_a)
+        self.assertEqual(other.user_id, self.picker_a)
+        with self.assertRaises(UserError):
+            pick.action_auto_assign_responsible()
+        self._validate(pick)
+        self.assertFalse(pick.is_in_progress)
