@@ -42,6 +42,10 @@ transfers, as configured). A big order keeps its user busy while the
 others receive the small ones, so the work is spread by effort and not
 by count.
 
+The work can also flow as a queue: with a maximum of pending transfers
+per user (e.g. one), a transfer beyond that limit waits unassigned and
+is handed out, most urgent first, when a user finishes one.
+
 Chained operations can be assigned together: when a pick transfer gets
 its responsible, the following pack transfer can get its own responsible
 at the same time, either balanced within the pack pool or copied from
@@ -59,10 +63,14 @@ Configuration
    operation type (e.g. *Pick*).
 2. In *Responsible Assignment* choose *When the transfer is ready*, add
    the users of the *Responsible Pool* and the *Workload Measure*.
-3. For a chained operation type (e.g. *Pack*) choose *Together with the
+3. Set *Max Pending Transfers per User* to hand out the transfers one
+   (or a few) at a time: beyond that number a transfer waits unassigned
+   until a user finishes one. Leave 0 to assign everything as soon as it
+   is ready.
+4. For a chained operation type (e.g. *Pack*) choose *Together with the
    previous operation*. Either set its own pool, or check *Same
    Responsible as Previous Operation* so the user that picks also packs.
-4. On a user form, *Preferences* tab, uncheck *Available for Picking
+5. On a user form, *Preferences* tab, uncheck *Available for Picking
    Assignment* while the user is absent. The user is skipped until it is
    checked again.
 
@@ -77,13 +85,19 @@ A responsible set by hand to a user of the pool is respected. A
 responsible outside the pool (the salesperson that confirmed the order,
 the scheduler) is replaced.
 
+With a maximum of pending transfers per user, the transfers waiting for
+a responsible are the ready ones without responsible. They are handed
+out when a transfer is validated or cancelled, or when a user becomes
+available again.
+
 To redistribute the work, select the transfers in the list and run
 *Reassign Responsible*, or use the same action on the transfer form. It
 ignores the current responsible and picks the least loaded available
 user.
 
 The field *Next Operation Responsible* on the transfer shows who is in
-charge of the following chained transfer.
+charge of the following chained transfer (e.g. who packs what is being
+picked). Changing it there changes the responsible of that transfer.
 
 Bug Tracker
 ===========

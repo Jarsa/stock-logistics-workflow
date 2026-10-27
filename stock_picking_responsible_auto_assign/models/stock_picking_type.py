@@ -39,6 +39,13 @@ class StockPickingType(models.Model):
         help="Copy the responsible of the previous transfer instead of "
         "balancing the workload within the pool of this operation type.",
     )
+    responsible_assign_max_pending = fields.Integer(
+        string="Max Pending Transfers per User",
+        default=0,
+        help="Transfers a user can have pending at the same time. Beyond it "
+        "the transfer waits unassigned and is handed out when the user "
+        "finishes one, so the work flows as a queue. 0 means no limit.",
+    )
     responsible_assign_load = fields.Selection(
         selection=[
             ("moves", "Number of lines"),
@@ -67,8 +74,9 @@ class StockPickingType(models.Model):
 
     def _get_least_loaded_user(self, users):
         """Return the user of ``users`` with the lowest pending workload on
-        this operation type. Ties are broken by the number of pending
-        transfers and then by user id."""
+        this operation type, or an empty recordset when every user already
+        has the maximum of pending transfers. Ties are broken by the number
+        of pending transfers and then by user id."""
         self.ensure_one()
         load = dict.fromkeys(users, 0.0)
         count = dict.fromkeys(users, 0)
@@ -82,4 +90,30 @@ class StockPickingType(models.Model):
         for picking in pending:
             load[picking.user_id] += self._get_picking_load(picking)
             count[picking.user_id] += 1
+        if self.responsible_assign_max_pending:
+            users = users.filtered(
+                lambda u: count[u] < self.responsible_assign_max_pending
+            )
+        if not users:
+            return self.env["res.users"]
         return min(users, key=lambda u: (load[u], count[u], u.id))
+
+    def _assign_queued_pickings(self):
+        """Hand out the ready transfers waiting for a responsible, most
+        urgent first, until every user of the pool is at its maximum."""
+        for picking_type in self.filtered(
+            lambda t: t.responsible_assign_mode == "ready"
+            and t.responsible_assign_max_pending
+        ):
+            users = picking_type._get_assignable_users()
+            queued = self.env["stock.picking"].search(
+                [
+                    ("picking_type_id", "=", picking_type.id),
+                    ("state", "=", "assigned"),
+                    ("user_id", "not in", users.ids),
+                ],
+                order="priority desc, scheduled_date asc, id asc",
+            )
+            for picking in queued:
+                if not picking._auto_assign_responsible():
+                    break

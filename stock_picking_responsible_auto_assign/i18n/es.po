@@ -103,14 +103,6 @@ msgstr "Asignación de responsable"
 msgid "Responsible Pool"
 msgstr "Grupo de responsables"
 
-#. module: stock_picking_responsible_auto_assign
-#: model:ir.model.fields,help:stock_picking_responsible_auto_assign.field_stock_picking__next_picking_user_id
-msgid ""
-"Responsible of the first chained transfer that follows this one, e.g. who "
-"packs what this transfer picks."
-msgstr ""
-"Responsable de la primera transferencia encadenada que sigue a esta, p. ej. "
-"quién empaca lo que esta transferencia recolecta."
 
 #. module: stock_picking_responsible_auto_assign
 #: model:ir.model.fields,field_description:stock_picking_responsible_auto_assign.field_stock_picking_type__responsible_assign_same_user
@@ -175,3 +167,44 @@ msgstr "Cuando la transferencia está lista"
 #: model:ir.model.fields,field_description:stock_picking_responsible_auto_assign.field_stock_picking_type__responsible_assign_load
 msgid "Workload Measure"
 msgstr "Medida de carga de trabajo"
+
+#. module: stock_picking_responsible_auto_assign
+#: model:ir.model.fields,field_description:stock_picking_responsible_auto_assign.field_stock_picking_type__responsible_assign_max_pending
+msgid "Max Pending Transfers per User"
+msgstr "Máximo de transferencias pendientes por usuario"
+
+#. module: stock_picking_responsible_auto_assign
+#: model:ir.model.fields,help:stock_picking_responsible_auto_assign.field_stock_picking_type__responsible_assign_max_pending
+msgid ""
+"Transfers a user can have pending at the same time. Beyond it the transfer "
+"waits unassigned and is handed out when the user finishes one, so the work "
+"flows as a queue. 0 means no limit."
+msgstr ""
+"Transferencias que un usuario puede tener pendientes al mismo tiempo. Por "
+"encima de ese número la transferencia espera sin responsable y se entrega "
+"cuando el usuario termina una, para que el trabajo fluya como una cola. 0 "
+"significa sin límite."
+
+#. module: stock_picking_responsible_auto_assign
+#: model:ir.model.fields,field_description:stock_picking_responsible_auto_assign.field_stock_picking__next_picking_id
+msgid "Next Operation"
+msgstr "Siguiente operación"
+
+#. module: stock_picking_responsible_auto_assign
+#: model:ir.model.fields,help:stock_picking_responsible_auto_assign.field_stock_picking__next_picking_id
+msgid ""
+"First chained transfer that follows this one, e.g. the pack of what this "
+"transfer picks."
+msgstr ""
+"Primera transferencia encadenada que sigue a esta, p. ej. el empaque de lo "
+"que esta transferencia recolecta."
+
+#. module: stock_picking_responsible_auto_assign
+#: model:ir.model.fields,help:stock_picking_responsible_auto_assign.field_stock_picking__next_picking_user_id
+msgid ""
+"Responsible of the next operation, e.g. who packs what this transfer picks. "
+"Changing it changes the responsible of that transfer."
+msgstr ""
+"Responsable de la siguiente operación, p. ej. quién empaca lo que esta "
+"transferencia recolecta. Al cambiarlo cambia el responsable de esa "
+"transferencia."

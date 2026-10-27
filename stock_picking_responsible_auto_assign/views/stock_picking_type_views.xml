@@ -21,6 +21,10 @@
                         name="responsible_assign_load"
                         invisible="responsible_assign_mode == 'manual' or responsible_assign_same_user"
                     />
+                    <field
+                        name="responsible_assign_max_pending"
+                        invisible="responsible_assign_mode != 'ready'"
+                    />
                 </group>
             </group>
         </field>
