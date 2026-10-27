@@ -139,8 +139,9 @@ msgstr ""
 #. module: stock_picking_responsible_auto_assign
 #: model:ir.model.fields,help:stock_picking_responsible_auto_assign.field_stock_picking_type__responsible_user_ids
 msgid ""
-"Users that receive the transfers of this operation type automatically. The "
-"transfer goes to the user with the lowest pending workload."
+"Internal users that receive the transfers of this operation type "
+"automatically, e.g. warehouse operators restricted to their operation types. "
+"The transfer goes to the user with the lowest pending workload."
 msgstr ""
 
 #. module: stock_picking_responsible_auto_assign
