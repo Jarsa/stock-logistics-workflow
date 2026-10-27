@@ -12,11 +12,10 @@ class StockPickingType(models.Model):
         comodel_name="res.users",
         relation="stock_picking_type_responsible_user_rel",
         string="Responsible Pool",
-        domain=lambda self: [
-            ("all_group_ids", "in", self.env.ref("stock.group_stock_user").id)
-        ],
-        help="Users that receive the transfers of this operation type "
-        "automatically. The transfer goes to the user with the lowest "
+        domain=[("share", "=", False)],
+        help="Internal users that receive the transfers of this operation "
+        "type automatically, e.g. warehouse operators restricted to their "
+        "operation types. The transfer goes to the user with the lowest "
         "pending workload.",
     )
     responsible_assign_mode = fields.Selection(
