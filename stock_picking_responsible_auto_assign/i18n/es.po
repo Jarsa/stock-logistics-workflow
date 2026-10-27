@@ -208,3 +208,38 @@ msgstr ""
 "Responsable de la siguiente operación, p. ej. quién empaca lo que esta "
 "transferencia recolecta. Al cambiarlo cambia el responsable de esa "
 "transferencia."
+
+#. module: stock_picking_responsible_auto_assign
+#: model:ir.model.fields,field_description:stock_picking_responsible_auto_assign.field_stock_picking__picking_progress
+msgid "Progress"
+msgstr "Avance"
+
+#. module: stock_picking_responsible_auto_assign
+#: model:ir.model.fields,help:stock_picking_responsible_auto_assign.field_stock_picking__picking_progress
+msgid "Picked lines over the lines of the transfer."
+msgstr "Líneas recolectadas sobre las líneas de la transferencia."
+
+#. module: stock_picking_responsible_auto_assign
+#: model:ir.model.fields,field_description:stock_picking_responsible_auto_assign.field_stock_picking__is_in_progress
+#: model_terms:ir.ui.view,arch_db:stock_picking_responsible_auto_assign.view_picking_internal_search
+msgid "In Progress"
+msgstr "En proceso"
+
+#. module: stock_picking_responsible_auto_assign
+#: model:ir.model.fields,help:stock_picking_responsible_auto_assign.field_stock_picking__is_in_progress
+msgid ""
+"Ready transfer where the operator already picked some lines (e.g. scanned "
+"them in the barcode app) but did not validate yet."
+msgstr ""
+"Transferencia lista en la que el operador ya recolectó algunas líneas (p. "
+"ej. las escaneó en la app de código de barras) pero todavía no la valida."
+
+#. module: stock_picking_responsible_auto_assign
+#. odoo-python
+#: code:addons/stock_picking_responsible_auto_assign/models/stock_picking.py:0
+msgid ""
+"%(pickings)s: already in progress, change the responsible by hand if you "
+"really want to take it away from %(users)s."
+msgstr ""
+"%(pickings)s: ya está en proceso, cambie el responsable a mano si de verdad "
+"quiere quitárselo a %(users)s."

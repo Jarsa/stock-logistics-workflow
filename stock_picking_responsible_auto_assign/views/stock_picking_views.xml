@@ -13,6 +13,7 @@
                     invisible="not next_picking_id"
                     readonly="state in ('done', 'cancel')"
                 />
+                <field name="picking_progress" invisible="state != 'assigned'" />
             </field>
         </field>
     </record>
@@ -27,7 +28,28 @@
                     optional="hide"
                     widget="many2one_avatar_user"
                 />
+                <field name="picking_progress" optional="hide" />
+                <field
+                    name="is_in_progress"
+                    optional="hide"
+                    widget="boolean_toggle"
+                    readonly="1"
+                />
             </field>
+        </field>
+    </record>
+    <record id="view_picking_internal_search" model="ir.ui.view">
+        <field name="name">stock.picking.search.responsible.auto.assign</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_internal_search" />
+        <field name="arch" type="xml">
+            <filter name="available" position="after">
+                <filter
+                    name="in_progress"
+                    string="In Progress"
+                    domain="[('is_in_progress', '=', True)]"
+                />
+            </filter>
         </field>
     </record>
 </odoo>
