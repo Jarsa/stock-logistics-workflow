@@ -6,22 +6,43 @@ from odoo import api, fields, models
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
+    next_picking_id = fields.Many2one(
+        comodel_name="stock.picking",
+        string="Next Operation",
+        compute="_compute_next_picking_id",
+        store=True,
+        help="First chained transfer that follows this one, e.g. the pack "
+        "of what this transfer picks.",
+    )
     next_picking_user_id = fields.Many2one(
         comodel_name="res.users",
         string="Next Operation Responsible",
         compute="_compute_next_picking_user_id",
+        inverse="_inverse_next_picking_user_id",
         store=True,
-        help="Responsible of the first chained transfer that follows this one, "
-        "e.g. who packs what this transfer picks.",
+        domain=[("share", "=", False)],
+        help="Responsible of the next operation, e.g. who packs what this "
+        "transfer picks. Changing it changes the responsible of that "
+        "transfer.",
     )
 
-    @api.depends("move_ids.move_dest_ids.picking_id.user_id")
+    @api.depends("move_ids.move_dest_ids.picking_id.state")
+    def _compute_next_picking_id(self):
+        for picking in self:
+            picking.next_picking_id = (
+                picking.move_ids.move_dest_ids.picking_id.filtered(
+                    lambda p: p.state not in ("done", "cancel")
+                )[:1]
+            )
+
+    @api.depends("next_picking_id.user_id")
     def _compute_next_picking_user_id(self):
         for picking in self:
-            next_pickings = picking.move_ids.move_dest_ids.picking_id.filtered(
-                lambda p: p.state not in ("done", "cancel")
-            )
-            picking.next_picking_user_id = next_pickings[:1].user_id
+            picking.next_picking_user_id = picking.next_picking_id.user_id
+
+    def _inverse_next_picking_user_id(self):
+        for picking in self.filtered("next_picking_id"):
+            picking.next_picking_id.user_id = picking.next_picking_user_id
 
     def action_confirm(self):
         res = super().action_confirm()
@@ -42,14 +63,17 @@ class StockPicking(models.Model):
         self._auto_assign_responsible(force=True)
 
     def _auto_assign_responsible(self, force=False):
-        """Assign the least loaded user of the operation type pool.
+        """Assign the least loaded user of the operation type pool. Returns
+        whether every transfer got a responsible.
 
         Without ``force`` a responsible already in the pool is kept, so a
         manual choice of the warehouse manager is respected and repeated
         reservations do not reshuffle the work. A responsible outside the
         pool (the salesperson that confirmed the order, the scheduler bot)
-        is always replaced.
+        is always replaced. When the pool is at its maximum of pending
+        transfers the transfer is left unassigned, queued for later.
         """
+        assigned = True
         for picking in self:
             picking_type = picking.picking_type_id
             users = picking_type._get_assignable_users()
@@ -60,8 +84,25 @@ class StockPicking(models.Model):
             # sudo: the reservation may run as a salesperson or the scheduler,
             # which may not see or write every pending transfer.
             picking_sudo = picking.sudo()
-            picking_sudo.user_id = picking_type.sudo()._get_least_loaded_user(users)
+            user = picking_type.sudo()._get_least_loaded_user(users)
+            if not user:
+                picking_sudo.user_id = False
+                assigned = False
+                continue
+            picking_sudo.user_id = user
             picking_sudo._auto_assign_chained_responsible(force=force)
+        return assigned
+
+    def _action_done(self):
+        res = super()._action_done()
+        # a finished transfer frees its user: hand out the next queued one
+        self.picking_type_id.sudo()._assign_queued_pickings()
+        return res
+
+    def action_cancel(self):
+        res = super().action_cancel()
+        self.picking_type_id.sudo()._assign_queued_pickings()
+        return res
 
     def _auto_assign_chained_responsible(self, force=False):
         for picking in self:

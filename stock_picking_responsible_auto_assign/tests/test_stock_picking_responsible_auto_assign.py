@@ -222,3 +222,71 @@ class TestStockPickingResponsibleAutoAssign(TransactionCase):
         pick, _ = self._create_chain(1)
         pick.action_assign()
         self.assertEqual(pick.user_id, self.env.user)
+
+    def _validate(self, picking):
+        for move in picking.move_ids:
+            move.quantity = move.product_uom_qty
+        picking.move_ids.picked = True
+        picking.button_validate()
+
+    def test_13_queue_one_at_a_time(self):
+        self.pick_type.responsible_assign_max_pending = 1
+        pick_1, pack_1 = self._create_chain(60)
+        pick_2, _ = self._create_chain(2)
+        pick_3, pack_3 = self._create_chain(2)
+        pick_4, _ = self._create_chain(2, qty=1)
+        pick_4.priority = "1"
+        for pick in (pick_1, pick_2, pick_3, pick_4):
+            pick.action_assign()
+        self.assertEqual(pick_1.user_id, self.picker_a)
+        self.assertEqual(pick_2.user_id, self.picker_b)
+        # both at their maximum: the rest wait unassigned, pack too
+        self.assertFalse(pick_3.user_id)
+        self.assertFalse(pick_4.user_id)
+        self.assertEqual(pack_1.user_id, self.packer_c)
+        self.assertNotIn(pack_3.user_id, self.packer_c | self.packer_d)
+        # repeated reservation does not assign either
+        pick_3.action_assign()
+        self.assertFalse(pick_3.user_id)
+        # B finishes: the urgent one goes to B, with its pack
+        self._validate(pick_2)
+        self.assertEqual(pick_4.user_id, self.picker_b)
+        self.assertFalse(pick_3.user_id)
+        self._validate(pick_4)
+        self.assertEqual(pick_3.user_id, self.picker_b)
+        self.assertEqual(pack_3.user_id, self.packer_d)
+
+    def test_14_queue_cancel_and_availability(self):
+        self.pick_type.responsible_assign_max_pending = 1
+        self.picker_b.picking_assign_available = False
+        pick_1, _ = self._create_chain(1)
+        pick_2, _ = self._create_chain(1)
+        (pick_1 | pick_2).action_assign()
+        self.assertEqual(pick_1.user_id, self.picker_a)
+        self.assertFalse(pick_2.user_id)
+        self.picker_b.picking_assign_available = True
+        self.assertEqual(pick_2.user_id, self.picker_b)
+        pick_3, _ = self._create_chain(1)
+        pick_3.action_assign()
+        self.assertFalse(pick_3.user_id)
+        pick_1.action_cancel()
+        self.assertEqual(pick_3.user_id, self.picker_a)
+
+    def test_15_no_limit_assigns_everything(self):
+        picks = [self._create_chain(1)[0] for _ in range(4)]
+        for pick in picks:
+            pick.action_assign()
+        self.assertTrue(all(p.user_id in self.picker_a | self.picker_b for p in picks))
+
+    def test_16_next_responsible_editable(self):
+        pick, pack = self._create_chain(2)
+        pick.action_assign()
+        self.assertEqual(pick.next_picking_id, pack)
+        self.assertEqual(pick.next_picking_user_id, self.packer_c)
+        pick.next_picking_user_id = self.packer_d
+        self.assertEqual(pack.user_id, self.packer_d)
+        pack.user_id = self.packer_c
+        self.assertEqual(pick.next_picking_user_id, self.packer_c)
+        self._validate(pick)
+        self._validate(pack)
+        self.assertFalse(pick.next_picking_id)

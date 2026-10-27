@@ -383,6 +383,9 @@ lowest pending workload (number of lines, quantity or number of
 transfers, as configured). A big order keeps its user busy while the
 others receive the small ones, so the work is spread by effort and not
 by count.</p>
+<p>The work can also flow as a queue: with a maximum of pending transfers
+per user (e.g. one), a transfer beyond that limit waits unassigned and
+is handed out, most urgent first, when a user finishes one.</p>
 <p>Chained operations can be assigned together: when a pick transfer gets
 its responsible, the following pack transfer can get its own responsible
 at the same time, either balanced within the pack pool or copied from
@@ -408,6 +411,10 @@ the pick. The picker then knows from the start who will pack the goods.</p>
 operation type (e.g. <em>Pick</em>).</li>
 <li>In <em>Responsible Assignment</em> choose <em>When the transfer is ready</em>, add
 the users of the <em>Responsible Pool</em> and the <em>Workload Measure</em>.</li>
+<li>Set <em>Max Pending Transfers per User</em> to hand out the transfers one
+(or a few) at a time: beyond that number a transfer waits unassigned
+until a user finishes one. Leave 0 to assign everything as soon as it
+is ready.</li>
 <li>For a chained operation type (e.g. <em>Pack</em>) choose <em>Together with the
 previous operation</em>. Either set its own pool, or check <em>Same
 Responsible as Previous Operation</em> so the user that picks also packs.</li>
@@ -424,12 +431,17 @@ creation).</p>
 <p>A responsible set by hand to a user of the pool is respected. A
 responsible outside the pool (the salesperson that confirmed the order,
 the scheduler) is replaced.</p>
+<p>With a maximum of pending transfers per user, the transfers waiting for
+a responsible are the ready ones without responsible. They are handed
+out when a transfer is validated or cancelled, or when a user becomes
+available again.</p>
 <p>To redistribute the work, select the transfers in the list and run
 <em>Reassign Responsible</em>, or use the same action on the transfer form. It
 ignores the current responsible and picks the least loaded available
 user.</p>
 <p>The field <em>Next Operation Responsible</em> on the transfer shows who is in
-charge of the following chained transfer.</p>
+charge of the following chained transfer (e.g. who packs what is being
+picked). Changing it there changes the responsible of that transfer.</p>
 </div>
 <div class="section" id="bug-tracker">
 <h2><a class="toc-backref" href="#toc-entry-3">Bug Tracker</a></h2>

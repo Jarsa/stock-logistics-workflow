@@ -5,9 +5,14 @@ A responsible set by hand to a user of the pool is respected. A responsible
 outside the pool (the salesperson that confirmed the order, the scheduler) is
 replaced.
 
+With a maximum of pending transfers per user, the transfers waiting for a
+responsible are the ready ones without responsible. They are handed out when
+a transfer is validated or cancelled, or when a user becomes available again.
+
 To redistribute the work, select the transfers in the list and run
 *Reassign Responsible*, or use the same action on the transfer form. It
 ignores the current responsible and picks the least loaded available user.
 
 The field *Next Operation Responsible* on the transfer shows who is in charge
-of the following chained transfer.
+of the following chained transfer (e.g. who packs what is being picked).
+Changing it there changes the responsible of that transfer.
