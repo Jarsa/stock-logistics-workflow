@@ -1,6 +1,11 @@
 Nothing has to be done: the responsible is set when the transfer is reserved
 (check availability, scheduler, order confirmation or backorder creation).
 
+Only fully reserved transfers are handed out. A partially reserved transfer
+(ready under the *As soon as possible* shipping policy) waits without
+responsible until every line is reserved; it can still be assigned by hand or
+with *Reassign Responsible*.
+
 A responsible set by hand to a user of the pool is respected. A responsible
 outside the pool (the salesperson that confirmed the order, the scheduler) is
 replaced.

@@ -87,6 +87,15 @@ class StockPicking(models.Model):
             previous[:1]._auto_assign_chained_responsible()
         return res
 
+    def _is_fully_reserved(self):
+        """Under the "as soon as possible" shipping policy a transfer is ready
+        with a single reserved line; it is handed out only once every line is
+        reserved, so the operator gets work that can be completed."""
+        self.ensure_one()
+        return self.state == "assigned" and all(
+            move.state in ("assigned", "done", "cancel") for move in self.move_ids
+        )
+
     def action_auto_assign_responsible(self):
         """Reassign, skipping the transfers somebody already started."""
         in_progress = self.filtered("is_in_progress")
