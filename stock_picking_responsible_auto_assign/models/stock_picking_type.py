@@ -106,13 +106,17 @@ class StockPickingType(models.Model):
             and t.responsible_assign_max_pending
         ):
             users = picking_type._get_assignable_users()
-            queued = self.env["stock.picking"].search(
-                [
-                    ("picking_type_id", "=", picking_type.id),
-                    ("state", "=", "assigned"),
-                    ("user_id", "not in", users.ids),
-                ],
-                order="priority desc, scheduled_date asc, id asc",
+            queued = (
+                self.env["stock.picking"]
+                .search(
+                    [
+                        ("picking_type_id", "=", picking_type.id),
+                        ("state", "=", "assigned"),
+                        ("user_id", "not in", users.ids),
+                    ],
+                    order="priority desc, scheduled_date asc, id asc",
+                )
+                .filtered(lambda p: p._is_fully_reserved())
             )
             for picking in queued:
                 if not picking._auto_assign_responsible():

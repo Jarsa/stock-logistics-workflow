@@ -321,3 +321,34 @@ class TestStockPickingResponsibleAutoAssign(TransactionCase):
             pick.action_auto_assign_responsible()
         self._validate(pick)
         self.assertFalse(pick.is_in_progress)
+
+    def test_18_partially_reserved_waits(self):
+        self.pick_type.responsible_assign_max_pending = 1
+        pickers = self.picker_a | self.picker_b
+        scarce = self.products[1]
+        self.env["stock.quant"]._update_available_quantity(
+            scarce, self.stock_location, -1000
+        )
+        partial = self._create_picking(self.pick_type, 2)
+        partial.action_assign()
+        # ready under the "as soon as possible" policy, but not completable
+        self.assertEqual(partial.state, "assigned")
+        self.assertNotIn(partial.user_id, pickers)
+        pick_a = self._create_picking(self.pick_type, 1)
+        pick_b = self._create_picking(self.pick_type, 1)
+        queued = self._create_picking(self.pick_type, 1)
+        (pick_a | pick_b | queued).action_assign()
+        self.assertEqual(pick_a.user_id, self.picker_a)
+        self.assertEqual(pick_b.user_id, self.picker_b)
+        # the queue skips the older partial transfer
+        self._validate(pick_b)
+        self.assertEqual(queued.user_id, self.picker_b)
+        self.assertNotIn(partial.user_id, pickers)
+        # once fully reserved it is handed out, and by hand it always can
+        self.env["stock.quant"]._update_available_quantity(
+            scarce, self.stock_location, 5
+        )
+        self._validate(pick_a)
+        self.assertNotIn(partial.user_id, pickers)
+        partial.action_assign()
+        self.assertEqual(partial.user_id, self.picker_a)

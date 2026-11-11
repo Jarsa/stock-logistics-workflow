@@ -11,7 +11,7 @@ class StockMove(models.Model):
         # Every reservation (button, scheduler, confirmation, backorder) ends
         # here, so this is the single place where a transfer becomes ready.
         self.picking_id.filtered(
-            lambda p: p.state == "assigned"
-            and p.picking_type_id.responsible_assign_mode == "ready"
+            lambda p: p.picking_type_id.responsible_assign_mode == "ready"
+            and p._is_fully_reserved()
         )._auto_assign_responsible()
         return res
